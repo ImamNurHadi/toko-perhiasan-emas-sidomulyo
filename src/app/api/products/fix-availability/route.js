@@ -3,7 +3,7 @@ import connectDB from '../../../../../lib/mongodb';
 import Product from '../../../../../models/Product';
 
 // Fix products missing isAvailable field
-export async function POST(request) {
+export async function POST(_request) {
   try {
     await connectDB();
     

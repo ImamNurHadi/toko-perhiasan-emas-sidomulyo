@@ -70,7 +70,7 @@ const AdminSchedule = () => {
               ampmElement.style.display = 'none';
               ampmElement.remove();
             }
-          } catch (e) {
+          } catch (_e) {
             console.log('Cannot access shadow DOM');
           }
         }
@@ -312,7 +312,7 @@ const AdminSchedule = () => {
         input.value = '';
         input.value = value;
       });
-    } catch (e) {
+    } catch (_e) {
       console.log('Locale setting not supported in this browser');
     }
 
@@ -374,7 +374,7 @@ const AdminSchedule = () => {
                     ✏️ Mode Edit Jadwal
                   </h3>
                   <p className="text-sm text-yellow-600">
-                    Anda sedang mengedit jadwal operasional. Klik "Simpan Jadwal" untuk menyimpan perubahan.
+                    Anda sedang mengedit jadwal operasional. Klik &quot;Simpan Jadwal&quot; untuk menyimpan perubahan.
                   </p>
                 </div>
                 <div className="flex items-center space-x-2 px-4 py-2 rounded-full bg-yellow-100">
@@ -523,7 +523,7 @@ const AdminSchedule = () => {
                                 setTimeout(() => {
                                   try {
                                     e.target.showPicker();
-                                  } catch (err) {
+                                  } catch (_err) {
                                     console.log('showPicker not supported');
                                   }
                                 }, 100);
@@ -567,7 +567,7 @@ const AdminSchedule = () => {
                                 setTimeout(() => {
                                   try {
                                     e.target.showPicker();
-                                  } catch (err) {
+                                  } catch (_err) {
                                     console.log('showPicker not supported');
                                   }
                                 }, 100);

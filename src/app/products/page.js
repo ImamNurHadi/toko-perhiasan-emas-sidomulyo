@@ -262,7 +262,7 @@ export default function ProductsPage() {
           <div className="flex justify-between items-center">
             <p className="text-gray-600">
               {searchQuery ? (
-                <>Menampilkan {filteredProducts.length} hasil untuk "<strong>{searchQuery}</strong>"</>
+                <>Menampilkan {filteredProducts.length} hasil untuk &quot;<strong>{searchQuery}</strong>&quot;</>
               ) : (
                 <>Menampilkan {filteredProducts.length} produk {selectedCategory !== 'all' ? `kategori ${categories.find(cat => cat.id === selectedCategory)?.name}` : ''}</>
               )}

@@ -3,7 +3,7 @@ import connectDB from '../../../../../lib/mongodb';
 import Product from '../../../../../models/Product';
 
 // Debug endpoint - tampilkan semua produk tanpa filter
-export async function GET(request) {
+export async function GET(_request) {
   try {
     await connectDB();
     

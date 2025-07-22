@@ -3,7 +3,7 @@ import connectDB from '../../../../lib/mongodb';
 import StoreSettings from '../../../../models/StoreSettings';
 
 // GET /api/store-settings - Mendapatkan pengaturan toko
-export async function GET(request) {
+export async function GET(_request) {
   try {
     await connectDB();
     
