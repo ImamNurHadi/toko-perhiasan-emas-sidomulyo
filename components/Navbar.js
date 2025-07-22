@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 const Navbar = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [storeStatus, setStoreStatus] = useState({ isOpen: false, nextOpen: null });
+  const [storeSettings, setStoreSettings] = useState({ storeName: 'Toko Emas Sidomulyo' });
   const dropdownRef = useRef(null);
   const pathname = usePathname();
 
@@ -32,7 +34,17 @@ const Navbar = () => {
       const response = await fetch('/api/store-settings');
       const data = await response.json();
       
-      if (!data.success || !data.data.operatingHours) {
+      if (!data.success || !data.data) {
+        setStoreStatus({ isOpen: false, nextOpen: null });
+        return;
+      }
+
+      // Update store settings for navbar
+      if (data.data.storeName) {
+        setStoreSettings({ storeName: data.data.storeName });
+      }
+
+      if (!data.data.operatingHours) {
         setStoreStatus({ isOpen: false, nextOpen: null });
         return;
       }
@@ -85,10 +97,20 @@ const Navbar = () => {
           {/* Logo & Brand */}
           <div className="flex items-center space-x-3">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xl">E</span>
+              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/images/logo_sidomulyo.png"
+                  alt="Logo Sidomulyo"
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '<span class="text-white font-bold text-xl">S</span>';
+                  }}
+                />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Toko Emasku</h1>
+                              <h1 className="text-2xl font-bold text-gray-900">{storeSettings.storeName}</h1>
             </Link>
           </div>
 
@@ -176,23 +198,24 @@ const Navbar = () => {
                     </div>
                   </Link>
 
-                  <hr className="my-2 border-gray-100" />
-                  
                   <Link
-                    href="/admin/settings"
+                    href="/admin/store-settings"
                     onClick={() => setIsSettingsOpen(false)}
                     className={`flex items-center px-4 py-3 text-sm transition-colors ${
-                      isActive('/admin/settings')
-                        ? 'bg-gray-50 text-gray-700 border-r-2 border-gray-400'
+                      isActive('/admin/store-settings')
+                        ? 'bg-yellow-50 text-yellow-700 border-r-2 border-yellow-400'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    <span className="mr-3">⚙️</span>
+                    <span className="mr-3">🏪</span>
                     <div>
                       <div className="font-medium">Pengaturan Toko</div>
                       <div className="text-xs text-gray-500">Visi, Misi, Kontak</div>
                     </div>
                   </Link>
+
+
+
                 </div>
               )}
             </div>

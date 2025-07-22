@@ -373,61 +373,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="contact" className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">E</span>
-                </div>
-                <h4 className="text-xl font-bold">Toko Emasku</h4>
-              </div>
-              <p className="text-gray-400">
-                Perhiasan emas berkualitas untuk momen spesial Anda.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Produk</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-yellow-400 transition-colors">Cincin</a></li>
-                <li><a href="#" className="hover:text-yellow-400 transition-colors">Kalung</a></li>
-                <li><a href="#" className="hover:text-yellow-400 transition-colors">Gelang</a></li>
-                <li><a href="#" className="hover:text-yellow-400 transition-colors">Anting</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Layanan</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-yellow-400 transition-colors">Konsultasi</a></li>
-                <li><a href="#" className="hover:text-yellow-400 transition-colors">Custom Design</a></li>
-                <li><a href="#" className="hover:text-yellow-400 transition-colors">Perawatan</a></li>
-                <li><a href="#" className="hover:text-yellow-400 transition-colors">Garansi</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Kontak</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>📍 Jl. Emas Mulia No. 123</li>
-                <li>📞 +62 123 4567 8900</li>
-                <li>✉️ info@tokoemasu.com</li>
-                <li className={`flex items-center ${storeStatus.isOpen ? 'text-green-400' : 'text-red-400'}`}>
-                  <div className={`w-2 h-2 rounded-full mr-2 ${storeStatus.isOpen ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                  {storeStatus.isOpen ? 'Sedang BUKA' : 'Sedang TUTUP'}
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Toko Emasku. Semua hak cipta dilindungi.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 } 
