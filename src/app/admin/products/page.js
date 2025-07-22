@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -34,12 +34,12 @@ const AdminProducts = () => {
     fetchProducts();
   }, []);
 
-  // Harga per gram berdasarkan kode emas
-  const goldPrices = {
+  // Harga per gram berdasarkan kode emas - moved outside component or use useMemo
+  const goldPrices = useMemo(() => ({
     '+6': 705000,
     'X': 740000,
     'XX': 780000
-  };
+  }), []);
 
   // Fungsi untuk menghitung harga otomatis
   const calculatePrice = useCallback((code, weight) => {
@@ -109,7 +109,7 @@ const AdminProducts = () => {
     }
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const response = await fetch('/api/products?limit=100');
       const data = await response.json();
@@ -121,7 +121,7 @@ const AdminProducts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -246,10 +246,36 @@ const AdminProducts = () => {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingProduct(null);
-  };
+    // Ensure body scroll is restored
+    document.body.style.overflow = 'unset';
+  }, []);
+
+  // Handle modal open/close effects
+  useEffect(() => {
+    if (isModalOpen) {
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+      
+      // Add escape key listener
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          closeModal();
+        }
+      };
+      
+      document.addEventListener('keydown', handleEscape);
+      
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'unset';
+      };
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [isModalOpen, closeModal]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', {
@@ -428,19 +454,21 @@ const AdminProducts = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <button
-                        onClick={() => handleEdit(product)}
-                        className="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded-md transition-colors"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product._id)}
-                        className="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded-md transition-colors"
-                      >
-                        🗑️ Hapus
-                      </button>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded-md transition-colors"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product._id)}
+                          className="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded-md transition-colors"
+                        >
+                          🗑️ Hapus
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -451,8 +479,19 @@ const AdminProducts = () => {
 
         {/* Modal for Add/Edit Product */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+          <div 
+            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+            onClick={(e) => {
+              // Close modal when clicking backdrop
+              if (e.target === e.currentTarget) {
+                closeModal();
+              }
+            }}
+          >
+            <div 
+              className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white"
+              onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking inside modal
+            >
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-900">
