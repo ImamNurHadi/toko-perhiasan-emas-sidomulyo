@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ProductCard from '../../components/ProductCard';
 
 export default function Home() {
@@ -8,15 +8,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [storeStatus, setStoreStatus] = useState({ isOpen: false, nextOpen: null });
 
-  useEffect(() => {
-    fetchFeaturedProducts();
-    checkStoreStatus();
-    // Update status setiap menit
-    const interval = setInterval(checkStoreStatus, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchFeaturedProducts = async () => {
+  const fetchFeaturedProducts = useCallback(async () => {
     try {
       const response = await fetch('/api/products?featured=true&limit=6');
       const data = await response.json();
@@ -28,12 +20,17 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // State untuk jadwal dari database
   const [storeSchedule, setStoreSchedule] = useState({});
 
-  const checkStoreStatus = async () => {
+  const timeToMinutes = useCallback((timeString) => {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+  }, []);
+
+  const checkStoreStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/store-settings');
       const data = await response.json();
@@ -106,12 +103,15 @@ export default function Home() {
       console.error('Error fetching store status:', error);
       setStoreStatus({ isOpen: false, nextOpen: null });
     }
-  };
+  }, [timeToMinutes]);
 
-  const timeToMinutes = (timeString) => {
-    const [hours, minutes] = timeString.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
+  useEffect(() => {
+    fetchFeaturedProducts();
+    checkStoreStatus();
+    // Update status setiap menit
+    const interval = setInterval(checkStoreStatus, 60000);
+    return () => clearInterval(interval);
+  }, [fetchFeaturedProducts, checkStoreStatus]);
 
   const getDayName = (dayNumber) => {
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

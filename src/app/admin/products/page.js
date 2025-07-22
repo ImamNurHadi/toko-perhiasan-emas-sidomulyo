@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -42,11 +42,11 @@ const AdminProducts = () => {
   };
 
   // Fungsi untuk menghitung harga otomatis
-  const calculatePrice = (code, weight) => {
+  const calculatePrice = useCallback((code, weight) => {
     const pricePerGram = goldPrices[code] || 0;
     const weightNum = parseFloat(weight) || 0;
     return pricePerGram * weightNum;
-  };
+  }, [goldPrices]);
 
   // Update harga saat kode atau berat berubah
   useEffect(() => {
@@ -55,7 +55,7 @@ const AdminProducts = () => {
       ...prev,
       price: newPrice
     }));
-  }, [formData.code, formData.weight]);
+  }, [formData.code, formData.weight, calculatePrice]);
 
   // Fungsi untuk upload gambar
   const handleImageUpload = async (file) => {

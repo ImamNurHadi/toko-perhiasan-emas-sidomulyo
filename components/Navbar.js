@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -22,14 +22,12 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Check store status berdasarkan database
-  useEffect(() => {
-    checkStoreStatus();
-    const interval = setInterval(checkStoreStatus, 60000);
-    return () => clearInterval(interval);
+  const timeToMinutes = useCallback((timeString) => {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
   }, []);
 
-  const checkStoreStatus = async () => {
+  const checkStoreStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/store-settings');
       const data = await response.json();
@@ -68,12 +66,14 @@ const Navbar = () => {
       console.error('Error fetching store status:', error);
       setStoreStatus({ isOpen: false, nextOpen: null });
     }
-  };
+  }, [timeToMinutes]);
 
-  const timeToMinutes = (timeString) => {
-    const [hours, minutes] = timeString.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
+  // Check store status berdasarkan database
+  useEffect(() => {
+    checkStoreStatus();
+    const interval = setInterval(checkStoreStatus, 60000);
+    return () => clearInterval(interval);
+  }, [checkStoreStatus]);
 
   const isActive = (path) => pathname === path;
 

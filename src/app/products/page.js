@@ -1,37 +1,37 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
-export default function ProductsPage() {
+const categories = [
+  { id: 'all', name: 'Semua Produk', emoji: '🏪', count: 0 },
+  { id: 'cincin', name: 'Cincin', emoji: '💍', count: 0 },
+  { id: 'kalung', name: 'Kalung', emoji: '📿', count: 0 },
+  { id: 'gelang', name: 'Gelang', emoji: '🔗', count: 0 },
+  { id: 'anting', name: 'Anting', emoji: '👂', count: 0 },
+  { id: 'liontin', name: 'Liontin', emoji: '🔶', count: 0 },
+  { id: 'bros', name: 'Bros', emoji: '📌', count: 0 },
+];
+
+function ProductsContent() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
 
-  const categories = [
-    { id: 'all', name: 'Semua Produk', emoji: '🏪', count: 0 },
-    { id: 'cincin', name: 'Cincin', emoji: '💍', count: 0 },
-    { id: 'kalung', name: 'Kalung', emoji: '📿', count: 0 },
-    { id: 'gelang', name: 'Gelang', emoji: '🔗', count: 0 },
-    { id: 'anting', name: 'Anting', emoji: '👂', count: 0 },
-    { id: 'liontin', name: 'Liontin', emoji: '🔶', count: 0 },
-    { id: 'bros', name: 'Bros', emoji: '📌', count: 0 },
-  ];
+  const updateCategoryCount = useCallback((productList) => {
+    categories.forEach(cat => {
+      if (cat.id === 'all') {
+        cat.count = productList.length;
+      } else {
+        cat.count = productList.filter(product => product.category === cat.id).length;
+      }
+    });
+  }, []);
 
-  useEffect(() => {
-    fetchProducts();
-    
-    // Set kategori dari URL parameter
-    const category = searchParams.get('category');
-    if (category && categories.find(cat => cat.id === category)) {
-      setSelectedCategory(category);
-    }
-  }, [searchParams]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/products?limit=100');
@@ -47,17 +47,17 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [updateCategoryCount]);
 
-  const updateCategoryCount = (productList) => {
-    categories.forEach(cat => {
-      if (cat.id === 'all') {
-        cat.count = productList.length;
-      } else {
-        cat.count = productList.filter(product => product.category === cat.id).length;
-      }
-    });
-  };
+  useEffect(() => {
+    fetchProducts();
+    
+    // Set kategori dari URL parameter
+    const category = searchParams.get('category');
+    if (category && categories.find(cat => cat.id === category)) {
+      setSelectedCategory(category);
+    }
+  }, [searchParams, fetchProducts]);
 
   // Filter produk berdasarkan kategori dan pencarian
   const filteredProducts = products.filter(product => {
@@ -319,5 +319,38 @@ export default function ProductsPage() {
         
       </div>
     </div>
+  );
+}
+
+function ProductsPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto"></div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-gray-300 h-64 rounded-xl mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded mb-2"></div>
+              <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsPageSkeleton />}>
+      <ProductsContent />
+    </Suspense>
   );
 } 
