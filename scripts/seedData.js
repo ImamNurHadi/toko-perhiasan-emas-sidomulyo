@@ -1,11 +1,14 @@
 // Script untuk mengisi data awal ke database
 import mongoose from 'mongoose';
 
-// Import models
+// MongoDB connection menggunakan environment variable
+// Pastikan file .env.local sudah dibuat dengan MONGODB_URI
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://adigaming015:16eo0ZnB4uEt4eCM@cluster0.jyglbwe.mongodb.net/sidomulyo?retryWrites=true&w=majority&appName=Cluster0';
+
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/sidomulyo');
-    console.log('✅ MongoDB Connected');
+    await mongoose.connect(MONGODB_URI);
+    console.log('✅ MongoDB Connected to:', MONGODB_URI.replace(/\/\/.*:.*@/, '//***:***@')); // Hide credentials in log
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error);
     process.exit(1);

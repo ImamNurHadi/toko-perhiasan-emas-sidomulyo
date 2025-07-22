@@ -63,8 +63,10 @@ export default function ProductsPage() {
   const filteredProducts = products.filter(product => {
     const matchCategory = selectedCategory === 'all' || product.category === selectedCategory;
     const matchSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCategory && matchSearch && product.isAvailable;
+                       (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    // Show products if isAvailable is true OR doesn't exist (for backward compatibility)
+    const isAvailable = product.isAvailable !== false;
+    return matchCategory && matchSearch && isAvailable;
   });
 
   const formatCurrency = (amount) => {

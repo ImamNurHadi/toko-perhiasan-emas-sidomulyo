@@ -14,7 +14,13 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit')) || 20;
     const page = parseInt(searchParams.get('page')) || 1;
     
-    let query = { isAvailable: true };
+    // Modified query: include products where isAvailable is true OR doesn't exist
+    let query = { 
+      $or: [
+        { isAvailable: true },
+        { isAvailable: { $exists: false } }
+      ]
+    };
     
     if (category) query.category = category;
     if (material) query.material = material;
