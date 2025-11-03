@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import AdminProtect from '../../../../components/AdminProtect';
 
 const AdminStoreSettings = () => {
   const [loading, setLoading] = useState(true);
@@ -128,6 +129,7 @@ const AdminStoreSettings = () => {
   }
 
   return (
+    <AdminProtect>
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -384,6 +386,7 @@ const AdminStoreSettings = () => {
         </form>
       </div>
     </div>
+    </AdminProtect>
   );
 };
 

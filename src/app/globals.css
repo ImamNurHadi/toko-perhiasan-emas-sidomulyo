@@ -19,10 +19,19 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  position: relative;
 }
 
 /* Custom utilities */
@@ -31,4 +40,11 @@ body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Ensure navbar stays in place */
+nav.sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
 }

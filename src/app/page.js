@@ -1,29 +1,29 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import ProductCard from '../../components/ProductCard';
 
 export default function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [storeStatus, setStoreStatus] = useState({ isOpen: false, nextOpen: null });
-
-  const fetchFeaturedProducts = useCallback(async () => {
-    try {
-      const response = await fetch('/api/products?featured=true&limit=6');
-      const data = await response.json();
-      if (data.success) {
-        setFeaturedProducts(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [goldPrices, setGoldPrices] = useState([]);
+  const [loadingGoldPrices, setLoadingGoldPrices] = useState(true);
+  const [whatsappNumber, setWhatsappNumber] = useState('');
 
   // State untuk jadwal dari database
   const [storeSchedule, setStoreSchedule] = useState({});
+
+  const fetchGoldPrices = useCallback(async () => {
+    try {
+      const response = await fetch('/api/gold-prices');
+      const data = await response.json();
+      if (data.success) {
+        setGoldPrices(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching gold prices:', error);
+    } finally {
+      setLoadingGoldPrices(false);
+    }
+  }, []);
 
   const timeToMinutes = useCallback((timeString) => {
     const [hours, minutes] = timeString.split(':').map(Number);
@@ -32,12 +32,19 @@ export default function Home() {
 
   const checkStoreStatus = useCallback(async () => {
     try {
-      const response = await fetch('/api/store-settings');
+      const response = await fetch('/api/store-settings', {
+        cache: 'no-store'
+      });
       const data = await response.json();
       
       if (!data.success || !data.data.operatingHours) {
         setStoreStatus({ isOpen: false, nextOpen: null });
         return;
+      }
+
+      // Get WhatsApp number from settings
+      if (data.data.contact && data.data.contact.whatsapp) {
+        setWhatsappNumber(data.data.contact.whatsapp);
       }
 
       const schedule = data.data.operatingHours;
@@ -106,16 +113,25 @@ export default function Home() {
   }, [timeToMinutes]);
 
   useEffect(() => {
-    fetchFeaturedProducts();
+    fetchGoldPrices();
     checkStoreStatus();
     // Update status setiap menit
     const interval = setInterval(checkStoreStatus, 60000);
     return () => clearInterval(interval);
-  }, [fetchFeaturedProducts, checkStoreStatus]);
+  }, [fetchGoldPrices, checkStoreStatus]);
 
   const getDayName = (dayNumber) => {
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     return days[dayNumber];
+  };
+
+  const formatWhatsAppLink = (phoneNumber) => {
+    if (!phoneNumber) return 'https://wa.me/6281234284009';
+    // Remove all non-numeric characters
+    const cleanNumber = phoneNumber.replace(/\D/g, '');
+    // Add country code if not present
+    const formattedNumber = cleanNumber.startsWith('62') ? cleanNumber : `62${cleanNumber.substring(1)}`;
+    return `https://wa.me/${formattedNumber}`;
   };
 
   const categories = [
@@ -164,10 +180,12 @@ export default function Home() {
                 Jelajahi Koleksi
               </a>
               <a 
-                href="#contact"
+                href={formatWhatsAppLink(whatsappNumber)}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-full font-semibold hover:border-yellow-500 hover:text-yellow-600 transition-colors text-center"
               >
-                Hubungi Kami
+                💬 Hubungi Kami
               </a>
             </div>
           </div>
@@ -176,6 +194,70 @@ export default function Home() {
         {/* Decorative elements */}
         <div className="absolute top-20 left-10 w-20 h-20 bg-yellow-200 rounded-full opacity-20 animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-32 h-32 bg-yellow-300 rounded-full opacity-20 animate-pulse delay-1000"></div>
+      </section>
+
+      {/* Gold Prices Section */}
+      <section className="py-16 bg-gradient-to-br from-yellow-50 to-amber-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              💰 Harga Emas Hari Ini
+            </h3>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Harga perhiasan emas terkini - Update setiap hari
+            </p>
+          </div>
+
+          {loadingGoldPrices ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+            </div>
+          ) : goldPrices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {goldPrices.map((price) => (
+                <div
+                  key={price._id}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-yellow-200 hover:border-yellow-400"
+                >
+                  <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 py-4 px-6">
+                    <h4 className="text-2xl font-bold text-white text-center">
+                      {price.code}
+                    </h4>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                      <div className="text-xs text-green-600 font-semibold mb-1 uppercase">
+                        💵 Harga Beli
+                      </div>
+                      <div className="text-2xl font-bold text-green-700">
+                        Rp {price.buyPrice.toLocaleString('id-ID')}
+                      </div>
+                      <div className="text-xs text-green-600 mt-1">per gram</div>
+                    </div>
+                    <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                      <div className="text-xs text-red-600 font-semibold mb-1 uppercase">
+                        💰 Harga Jual
+                      </div>
+                      <div className="text-2xl font-bold text-red-700">
+                        Rp {price.sellPrice.toLocaleString('id-ID')}
+                      </div>
+                      <div className="text-xs text-red-600 mt-1">per gram</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-2xl shadow-md max-w-md mx-auto">
+              <p className="text-gray-500 text-lg mb-2">
+                📊 Harga emas belum tersedia
+              </p>
+              <p className="text-gray-400 text-sm">
+                Silakan hubungi toko untuk informasi harga terkini
+              </p>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Categories Section */}
@@ -201,37 +283,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section id="products" className="py-16 bg-gradient-to-br from-gray-50 to-yellow-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Produk Pilihan
-            </h3>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Koleksi perhiasan emas terbaik yang dipilih khusus untuk Anda
-            </p>
-          </div>
-          
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
-            </div>
-          ) : featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <p className="text-gray-500 text-lg">
-                Produk akan segera hadir. Silakan kembali lagi nanti!
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* Visi Misi Section */}
       <section id="about" className="py-16 bg-white">
@@ -355,23 +406,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-yellow-400 to-yellow-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h3 className="text-3xl font-bold text-white mb-4">
-            Siap untuk Berbelanja?
-          </h3>
-          <p className="text-yellow-100 text-lg mb-8">
-            Dapatkan perhiasan emas berkualitas tinggi dengan layanan terbaik
-          </p>
-          <a 
-            href="/products"
-            className="bg-white text-yellow-600 px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105 inline-block"
-          >
-            Lihat Semua Produk
-          </a>
-        </div>
-      </section>
 
     </div>
   );

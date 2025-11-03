@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import AdminProtect from '../../../../components/AdminProtect';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -294,6 +295,7 @@ const AdminProducts = () => {
   }
 
   return (
+    <AdminProtect>
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -773,6 +775,7 @@ const AdminProducts = () => {
         )}
       </div>
     </div>
+    </AdminProtect>
   );
 };
 

@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start -H 192.168.1.8 -p 8080",
     "lint": "next lint",
-    "seed": "node scripts/seedData.js"
+    "seed": "node scripts/seedData.js",
+    "seed:gold": "node scripts/seedGoldPrices.js",
+    "seed:admin": "node scripts/seedAdmin.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

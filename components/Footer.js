@@ -26,7 +26,12 @@ const Footer = () => {
 
   const fetchStoreSettings = useCallback(async () => {
     try {
-      const response = await fetch('/api/store-settings');
+      const response = await fetch('/api/store-settings', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       const data = await response.json();
       
       if (data.success && data.data) {
@@ -73,14 +78,14 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto">
           
           {/* Top Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             
             {/* Brand Section */}
-            <div className="lg:col-span-2">
+            <div>
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center overflow-hidden">
                   <Image
-                    src="/images/logo_sidomulyo.png"
+                    src="/images/logo.png"
                     alt="Logo Sidomulyo"
                     width={40}
                     height={40}
@@ -135,28 +140,6 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Navigation Links */}
-            <div>
-              <h4 className="text-lg font-semibold text-yellow-400 mb-4">Navigasi</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
-                    🏠 Beranda
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
-                    💍 Katalog Produk
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/admin/products" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
-                    ⚙️ Admin Panel
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
             {/* Contact Info */}
             <div>
               <h4 className="text-lg font-semibold text-yellow-400 mb-4">Kontak</h4>
@@ -209,32 +192,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Misi Section */}
-          {storeSettings.mission && storeSettings.mission.length > 0 && (
-            <div className="border-t border-gray-700 pt-8 mb-8">
-              <h4 className="text-lg font-semibold text-yellow-400 mb-4 text-center">Misi Kami</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {storeSettings.mission.map((mission, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <span className="text-yellow-400 font-bold text-sm min-w-[20px]">{index + 1}.</span>
-                    <p className="text-gray-300 text-sm leading-relaxed">{mission}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Bottom Section */}
-      <div className="bg-gray-950 py-4 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-          <div className="text-gray-400 text-sm text-center md:text-left mb-2 md:mb-0">
-            © {new Date().getFullYear()} {storeSettings.storeName}. Semua hak dilindungi.
-          </div>
-          <div className="text-gray-500 text-xs text-center md:text-right">
-            <span>Dibuat dengan ❤️ untuk melayani Anda</span>
-          </div>
         </div>
       </div>
     </footer>
