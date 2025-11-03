@@ -177,6 +177,17 @@ const Navbar = () => {
               📦 Katalog
             </Link>
 
+            <Link 
+              href="/gold-history" 
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive('/gold-history') 
+                  ? 'bg-yellow-100 text-yellow-700' 
+                  : 'text-gray-700 hover:text-yellow-600 hover:bg-yellow-50'
+              }`}
+            >
+              💰 Harga
+            </Link>
+
             {/* Settings Dropdown - Only for Admin */}
             {user && user.role === 'admin' && (
             <div className="relative" ref={dropdownRef}>
@@ -400,6 +411,17 @@ const Navbar = () => {
                 }`}
               >
                 📦 Katalog
+              </Link>
+              <Link 
+                href="/gold-history" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive('/gold-history') 
+                    ? 'bg-yellow-100 text-yellow-700' 
+                    : 'text-gray-700 hover:text-yellow-600 hover:bg-yellow-50'
+                }`}
+              >
+                💰 Harga
               </Link>
               
               {/* Admin Menu - Only for Admin */}

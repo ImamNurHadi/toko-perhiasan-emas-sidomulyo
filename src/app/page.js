@@ -6,6 +6,8 @@ export default function Home() {
   const [storeStatus, setStoreStatus] = useState({ isOpen: false, nextOpen: null });
   const [goldPrices, setGoldPrices] = useState([]);
   const [loadingGoldPrices, setLoadingGoldPrices] = useState(true);
+  const [goldPriceHistory, setGoldPriceHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [whatsappNumber, setWhatsappNumber] = useState('');
 
   // State untuk jadwal dari database
@@ -22,6 +24,20 @@ export default function Home() {
       console.error('Error fetching gold prices:', error);
     } finally {
       setLoadingGoldPrices(false);
+    }
+  }, []);
+
+  const fetchGoldPriceHistory = useCallback(async () => {
+    try {
+      const response = await fetch('/api/gold-prices/history?limit=3');
+      const data = await response.json();
+      if (data.success) {
+        setGoldPriceHistory(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching gold price history:', error);
+    } finally {
+      setLoadingHistory(false);
     }
   }, []);
 
@@ -114,11 +130,12 @@ export default function Home() {
 
   useEffect(() => {
     fetchGoldPrices();
+    fetchGoldPriceHistory();
     checkStoreStatus();
     // Update status setiap menit
     const interval = setInterval(checkStoreStatus, 60000);
     return () => clearInterval(interval);
-  }, [fetchGoldPrices, checkStoreStatus]);
+  }, [fetchGoldPrices, fetchGoldPriceHistory, checkStoreStatus]);
 
   const getDayName = (dayNumber) => {
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -132,6 +149,18 @@ export default function Home() {
     // Add country code if not present
     const formattedNumber = cleanNumber.startsWith('62') ? cleanNumber : `62${cleanNumber.substring(1)}`;
     return `https://wa.me/${formattedNumber}`;
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return date.toLocaleDateString('id-ID', options);
   };
 
   const categories = [
@@ -257,6 +286,115 @@ export default function Home() {
               </p>
             </div>
           )}
+
+          {/* Gold Price News/Updates Section */}
+          {!loadingHistory && goldPriceHistory.length > 0 && (
+            <div className="mt-12 max-w-4xl mx-auto">
+              <div className="text-center mb-6">
+                <h4 className="text-2xl font-bold text-gray-900 mb-2">
+                  📰 Update Perubahan Harga Terbaru
+                </h4>
+                <p className="text-gray-600 text-sm">
+                  3 Perubahan harga emas terakhir
+                </p>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-yellow-100">
+                <div className="space-y-4">
+                  {goldPriceHistory.map((history, index) => (
+                    <div
+                      key={history._id || index}
+                      className={`p-4 rounded-lg border-l-4 ${
+                        history.changeType === 'naik'
+                          ? 'bg-green-50 border-green-500'
+                          : 'bg-red-50 border-red-500'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <span className="text-2xl">
+                              {history.changeType === 'naik' ? '📈' : '📉'}
+                            </span>
+                            <h5 className="font-bold text-gray-900">
+                              {history.code}
+                            </h5>
+                            <span
+                              className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                history.changeType === 'naik'
+                                  ? 'bg-green-200 text-green-800'
+                                  : 'bg-red-200 text-red-800'
+                              }`}
+                            >
+                              {history.changeType.toUpperCase()}
+                            </span>
+                          </div>
+
+                          <div className="text-sm text-gray-700 space-y-1">
+                            <p>
+                              <span className="font-medium">Harga Beli:</span>{' '}
+                              <span className="line-through text-gray-500">
+                                Rp {history.previousBuyPrice.toLocaleString('id-ID')}
+                              </span>
+                              {' → '}
+                              <span className={`font-bold ${
+                                history.changeType === 'naik' ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                Rp {history.newBuyPrice.toLocaleString('id-ID')}
+                              </span>
+                              {' '}
+                              <span className={`text-xs ${
+                                history.changeType === 'naik' ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                ({history.changeType === 'naik' ? '+' : ''}
+                                {(history.newBuyPrice - history.previousBuyPrice).toLocaleString('id-ID')})
+                              </span>
+                            </p>
+                            <p>
+                              <span className="font-medium">Harga Jual:</span>{' '}
+                              <span className="line-through text-gray-500">
+                                Rp {history.previousSellPrice.toLocaleString('id-ID')}
+                              </span>
+                              {' → '}
+                              <span className={`font-bold ${
+                                history.changeType === 'naik' ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                Rp {history.newSellPrice.toLocaleString('id-ID')}
+                              </span>
+                              {' '}
+                              <span className={`text-xs ${
+                                history.changeType === 'naik' ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                ({history.changeType === 'naik' ? '+' : ''}
+                                {(history.newSellPrice - history.previousSellPrice).toLocaleString('id-ID')})
+                              </span>
+                            </p>
+                          </div>
+
+                          <div className="mt-2 text-xs text-gray-500">
+                            🕒 {formatDate(history.changeDate)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Lihat Semua Button */}
+                <div className="mt-6 text-center">
+                  <a
+                    href="/gold-history"
+                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    <span>📊 Lihat Semua Riwayat</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -268,16 +406,15 @@ export default function Home() {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {categories.map((category) => (
-              <a
+              <div
                 key={category.id}
-                href={`/products?category=${category.id}`}
-                className="group bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl text-center hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 block"
+                className="group bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl text-center hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105"
               >
                 <div className="text-4xl mb-3">{category.emoji}</div>
                 <h4 className="font-semibold text-gray-900 group-hover:text-yellow-600 transition-colors">
                   {category.name}
                 </h4>
-              </a>
+              </div>
             ))}
           </div>
         </div>
