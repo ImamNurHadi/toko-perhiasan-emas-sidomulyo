@@ -1,223 +1,99 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    confirmPassword: '',
-    fullName: '',
-    email: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // Check if already logged in
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const response = await fetch('/api/auth/check');
-        const data = await response.json();
-        if (data.authenticated) {
-          router.push('/');
-        }
-      } catch (error) {
-        console.error('Error checking auth:', error);
-      }
-    }
-    checkAuth();
-  }, [router]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Password dan konfirmasi password tidak cocok');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password minimal 6 karakter');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-          fullName: formData.fullName,
-          email: formData.email
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Redirect to login page
-        alert('Registrasi berhasil! Silakan login.');
-        router.push('/login');
-      } else {
-        setError(data.error || 'Registrasi gagal');
-      }
-    } catch (error) {
-      console.error('Error during registration:', error);
-      setError('Terjadi kesalahan. Silakan coba lagi.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-amber-50 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-3xl">📝</span>
-            </div>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Registrasi
-          </h2>
-          <p className="text-gray-600">
-            Buat akun baru di Toko Perhiasan Emas Sido Mulyo
-          </p>
-        </div>
-
-        {/* Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          {error && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              <div className="flex items-center">
-                <span className="mr-2">❌</span>
-                {error}
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-yellow-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        
+        {/* Coming Soon Section */}
+        <div className="text-center mb-16">
+          <div className="inline-block mb-8">
+            <div className="relative">
+              <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                <span className="text-6xl">🔨</span>
+              </div>
+              <div className="absolute -top-2 -right-2 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center animate-bounce">
+                <span className="text-2xl">⚙️</span>
               </div>
             </div>
-          )}
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Username *
-              </label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                required
-                minLength={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-gray-900"
-                placeholder="Minimal 3 karakter"
-              />
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            Fitur Daftar
+          </h1>
+          <p className="text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 font-bold mb-8">
+            Masih Dalam Pengembangan
+          </p>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-12">
+            Kami sedang mempersiapkan fitur registrasi yang aman dan mudah untuk Anda. 
+            Nantikan fitur pendaftaran akun yang akan segera hadir!
+          </p>
+
+          {/* Progress Bar */}
+          <div className="max-w-md mx-auto mb-12">
+            <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 h-full rounded-full animate-pulse" style={{ width: '60%' }}></div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nama Lengkap
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-gray-900"
-                placeholder="Nama lengkap (opsional)"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-gray-900"
-                placeholder="email@example.com (opsional)"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password *
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-                minLength={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-gray-900"
-                placeholder="Minimal 6 karakter"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Konfirmasi Password *
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-gray-900"
-                placeholder="Ulangi password"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? '⏳ Memproses...' : '✅ Daftar Sekarang'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Sudah punya akun?{' '}
-              <Link href="/login" className="text-yellow-600 hover:text-yellow-700 font-semibold">
-                Login di sini
-              </Link>
-            </p>
+            <p className="text-sm text-gray-500 mt-2">Proses pengembangan: 60%</p>
           </div>
         </div>
 
-        {/* Back to Home */}
-        <div className="text-center">
-          <Link href="/" className="text-gray-600 hover:text-gray-900 font-medium">
-            ← Kembali ke Beranda
-          </Link>
+        {/* Features Preview */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 mb-16">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            Fitur Yang Akan Tersedia
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🔐</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Registrasi Aman</h3>
+              <p className="text-gray-600">Daftar dengan keamanan terjamin dan data terlindungi</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">👤</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Profil Lengkap</h3>
+              <p className="text-gray-600">Kelola profil Anda dengan informasi lengkap dan terupdate</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">⭐</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Akses Eksklusif</h3>
+              <p className="text-gray-600">Dapatkan akses ke fitur-fitur eksklusif untuk member</p>
+            </div>
+          </div>
         </div>
+
+        {/* CTA Section */}
+        <div className="text-center">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            Sementara Itu...
+          </h3>
+          <p className="text-gray-600 mb-8">
+            Anda dapat menghubungi kami langsung untuk informasi lebih lanjut
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/"
+              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+            >
+              🏠 Kembali ke Beranda
+            </Link>
+            <Link
+              href="/login"
+              className="bg-white text-gray-700 px-8 py-3 rounded-full font-semibold border-2 border-gray-300 hover:border-yellow-500 hover:text-yellow-600 transition-colors"
+            >
+              🔐 Halaman Login
+            </Link>
+          </div>
+        </div>
+
       </div>
     </div>
   );

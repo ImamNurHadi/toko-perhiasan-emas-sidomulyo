@@ -281,7 +281,21 @@ const Navbar = () => {
                     </div>
                   </Link>
 
-
+                  <Link
+                    href="/admin/nota"
+                    onClick={() => setIsSettingsOpen(false)}
+                    className={`flex items-center px-4 py-3 text-sm transition-colors ${
+                      isActive('/admin/nota')
+                        ? 'bg-yellow-50 text-yellow-700 border-r-2 border-yellow-400'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="mr-3">📄</span>
+                    <div>
+                      <div className="font-medium">Nota</div>
+                      <div className="text-xs text-gray-500">Buat & Cetak Nota</div>
+                    </div>
+                  </Link>
 
                 </div>
               )}
@@ -473,6 +487,17 @@ const Navbar = () => {
                     }`}
                   >
                     🏪 Pengaturan Toko
+                  </Link>
+                  <Link 
+                    href="/admin/nota" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                      isActive('/admin/nota') 
+                        ? 'bg-yellow-100 text-yellow-700' 
+                        : 'text-gray-700 hover:text-yellow-600 hover:bg-yellow-50'
+                    }`}
+                  >
+                    📄 Nota
                   </Link>
                 </>
               )}
