@@ -14,49 +14,17 @@ const AdminProducts = () => {
     name: '',
     category: 'cincin',
     code: '+6', // Kode emas: +6, X, XX
-    weight: '',
+    kadarK: '', // Kadar emas (contoh: "6K", "8K", "18K")
+    weight: '', // Berat referensi (opsional)
     images: [{ url: '', alt: '' }],
-    // Field otomatis yang akan dihitung
-    price: 0,
-    material: 'emas',
-    stock: 1,
-    isAvailable: true,
     description: '',
-    specifications: {},
-    tags: [],
-    featured: false,
-    discount: {
-      percentage: 0,
-      validUntil: ''
-    }
+    isAvailable: true,
   });
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Harga per gram berdasarkan kode emas - moved outside component or use useMemo
-  const goldPrices = useMemo(() => ({
-    '+6': 705000,
-    'X': 740000,
-    'XX': 780000
-  }), []);
-
-  // Fungsi untuk menghitung harga otomatis
-  const calculatePrice = useCallback((code, weight) => {
-    const pricePerGram = goldPrices[code] || 0;
-    const weightNum = parseFloat(weight) || 0;
-    return pricePerGram * weightNum;
-  }, [goldPrices]);
-
-  // Update harga saat kode atau berat berubah
-  useEffect(() => {
-    const newPrice = calculatePrice(formData.code, formData.weight);
-    setFormData(prev => ({
-      ...prev,
-      price: newPrice
-    }));
-  }, [formData.code, formData.weight, calculatePrice]);
 
   // Fungsi untuk upload gambar
   const handleImageUpload = async (file) => {
@@ -127,21 +95,24 @@ const AdminProducts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validasi
+    if (!formData.name || !formData.kadarK) {
+      alert('Nama dan kadar emas harus diisi');
+      return;
+    }
+    
     // Auto-generate deskripsi berdasarkan input
-    const autoDescription = `${formData.name} berbahan emas ${formData.code} dengan berat ${formData.weight} gram. Kategori: ${formData.category}.`;
+    const autoDescription = formData.description || `${formData.name} berbahan emas ${formData.code} dengan kadar ${formData.kadarK}. Kategori: ${formData.category}.`;
     
     const productData = {
-      ...formData,
-      price: calculatePrice(formData.code, formData.weight),
-      weight: parseFloat(formData.weight),
-      stock: parseInt(formData.stock),
+      name: formData.name,
+      category: formData.category,
+      code: formData.code,
+      kadarK: formData.kadarK,
+      weight: formData.weight ? parseFloat(formData.weight) : undefined,
+      images: formData.images || [],
       description: autoDescription,
-      tags: Array.isArray(formData.tags) ? formData.tags : [],
-      material: `emas-${formData.code}`,
-      discount: {
-        percentage: parseInt(formData.discount.percentage) || 0,
-        validUntil: formData.discount.validUntil ? new Date(formData.discount.validUntil) : null
-      }
+      isAvailable: formData.isAvailable !== false,
     };
 
     try {
@@ -174,32 +145,15 @@ const AdminProducts = () => {
   const handleEdit = (product) => {
     setEditingProduct(product);
     
-    // Extract kode dari material (contoh: emas-+6 -> +6)
-    const extractCode = (material) => {
-      if (material.includes('emas-+6')) return '+6';
-      if (material.includes('emas-X')) return 'X';  
-      if (material.includes('emas-XX')) return 'XX';
-      return '+6'; // default
-    };
-    
     setFormData({
       name: product.name || '',
       category: product.category || 'cincin',
-      code: extractCode(product.material || ''),
+      code: product.code || '+6',
+      kadarK: product.kadarK || '',
       weight: product.weight?.toString() || '',
       images: product.images || [{ url: '', alt: '' }],
-      price: product.price || 0,
-      material: product.material || 'emas',
-      stock: product.stock || 1,
-      isAvailable: product.isAvailable !== false,
       description: product.description || '',
-      specifications: product.specifications || {},
-      tags: product.tags || [],
-      featured: product.featured || false,
-      discount: {
-        percentage: product.discount?.percentage || 0,
-        validUntil: product.discount?.validUntil ? new Date(product.discount.validUntil).toISOString().slice(0, 16) : ''
-      }
+      isAvailable: product.isAvailable !== false,
     });
     setIsModalOpen(true);
   };
@@ -228,21 +182,11 @@ const AdminProducts = () => {
       name: '',
       category: 'cincin',
       code: '+6', // Kode emas default
+      kadarK: '',
       weight: '',
       images: [{ url: '', alt: '' }],
-      // Field otomatis
-      price: 0,
-      material: 'emas',
-      stock: 1,
-      isAvailable: true,
       description: '',
-      specifications: {},
-      tags: [],
-      featured: false,
-      discount: {
-        percentage: 0,
-        validUntil: ''
-      }
+      isAvailable: true,
     });
     setIsModalOpen(true);
   };
@@ -338,7 +282,7 @@ const AdminProducts = () => {
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Tersedia</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {products.filter(p => p.isAvailable && p.stock > 0).length}
+                  {products.filter(p => p.isAvailable).length}
                 </p>
               </div>
             </div>
@@ -346,27 +290,13 @@ const AdminProducts = () => {
 
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <span className="text-yellow-600 text-xl">⭐</span>
+              <div className="p-3 bg-gray-100 rounded-full">
+                <span className="text-gray-600 text-xl">🚫</span>
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">Featured</p>
+                <p className="text-sm text-gray-600">Nonaktif</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {products.filter(p => p.featured).length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-3 bg-red-100 rounded-full">
-                <span className="text-red-600 text-xl">⚠️</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Stok Habis</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {products.filter(p => p.stock === 0).length}
+                  {products.filter(p => !p.isAvailable).length}
                 </p>
               </div>
             </div>
@@ -386,10 +316,7 @@ const AdminProducts = () => {
                     Kategori
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Harga
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stok
+                    Kadar / Kode
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -422,7 +349,8 @@ const AdminProducts = () => {
                             {product.name}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {product.weight}gr • {product.material}
+                            {product.kadarK || '-'} • {product.code || '-'}
+                            {product.weight && ` • ${product.weight}gr`}
                           </div>
                         </div>
                       </div>
@@ -433,28 +361,17 @@ const AdminProducts = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(product.price)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {product.stock} unit
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{product.kadarK || '-'}</span>
+                        <span className="text-xs text-gray-500">Kode: {product.code || '-'}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        {product.featured && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            ⭐ Featured
-                          </span>
-                        )}
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          product.isAvailable ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {product.isAvailable ? 'Aktif' : 'Nonaktif'}
-                        </span>
-                      </div>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        product.isAvailable ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {product.isAvailable ? 'Aktif' : 'Nonaktif'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
@@ -508,25 +425,6 @@ const AdminProducts = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Info Harga per Gram */}
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                    <h4 className="text-sm font-medium text-yellow-800 mb-2">📊 Harga Emas per Gram</h4>
-                    <div className="grid grid-cols-3 gap-4 text-xs text-yellow-700">
-                      <div className="text-center">
-                        <strong>+6</strong><br/>
-                        Rp {goldPrices['+6'].toLocaleString('id-ID')}
-                      </div>
-                      <div className="text-center">
-                        <strong>X</strong><br/>
-                        Rp {goldPrices['X'].toLocaleString('id-ID')}
-                      </div>
-                      <div className="text-center">
-                        <strong>XX</strong><br/>
-                        Rp {goldPrices['XX'].toLocaleString('id-ID')}
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Input Fields */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Nama Produk */}
@@ -573,47 +471,43 @@ const AdminProducts = () => {
                         onChange={(e) => setFormData({...formData, code: e.target.value})}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="+6">+6 (Rp {goldPrices['+6'].toLocaleString('id-ID')}/gram)</option>
-                        <option value="X">X (Rp {goldPrices['X'].toLocaleString('id-ID')}/gram)</option>
-                        <option value="XX">XX (Rp {goldPrices['XX'].toLocaleString('id-ID')}/gram)</option>
+                        <option value="+6">+6</option>
+                        <option value="X">X</option>
+                        <option value="XX">XX</option>
                       </select>
                     </div>
 
-                    {/* Berat */}
+                    {/* Kadar Emas */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        ⚖️ Berat (gram) *
+                        💎 Kadar Emas *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.kadarK}
+                        onChange={(e) => setFormData({...formData, kadarK: e.target.value})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Contoh: 6K, 8K, 18K, 70%"
+                      />
+                    </div>
+
+                    {/* Berat Referensi (Opsional) */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        ⚖️ Berat Referensi (gram)
                       </label>
                       <input
                         type="number"
                         step="0.1"
-                        min="0.1"
-                        required
+                        min="0"
                         value={formData.weight}
                         onChange={(e) => setFormData({...formData, weight: e.target.value})}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Contoh: 2.5"
+                        placeholder="Opsional - hanya referensi"
                       />
+                      <p className="text-xs text-gray-500 mt-1">Berat aktual diinput saat membuat nota</p>
                     </div>
-                  </div>
-
-                  {/* Harga Otomatis */}
-                  <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                    <label className="block text-sm font-medium text-green-800 mb-2">
-                      💰 Harga Otomatis
-                    </label>
-                    <div className="text-2xl font-bold text-green-600">
-                      {formData.price > 0 ? (
-                        <>Rp {formData.price.toLocaleString('id-ID')}</>
-                      ) : (
-                        <span className="text-gray-400">Masukkan berat untuk kalkulasi harga</span>
-                      )}
-                    </div>
-                    {formData.weight && formData.code && (
-                      <div className="text-sm text-green-600 mt-1">
-                        {formData.weight} gram × Rp {goldPrices[formData.code].toLocaleString('id-ID')} = Rp {calculatePrice(formData.code, formData.weight).toLocaleString('id-ID')}
-                      </div>
-                    )}
                   </div>
 
                   {/* Gambar Produk */}
@@ -732,16 +626,6 @@ const AdminProducts = () => {
 
                   {/* Options */}
                   <div className="flex items-center space-x-6">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={formData.featured}
-                        onChange={(e) => setFormData({...formData, featured: e.target.checked})}
-                        className="rounded text-blue-600"
-                      />
-                      <span className="text-sm text-gray-700">⭐ Produk Unggulan</span>
-                    </label>
-                    
                     <label className="flex items-center space-x-2">
                       <input
                         type="checkbox"

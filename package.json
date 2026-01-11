@@ -10,7 +10,11 @@
     "lint": "next lint",
     "seed": "node scripts/seedData.js",
     "seed:gold": "node scripts/seedGoldPrices.js",
-    "seed:admin": "node scripts/seedAdmin.js"
+    "seed:admin": "node scripts/seedAdmin.js",
+    "seed:customers": "node scripts/seedCustomers.js",
+    "seed:products": "node scripts/seedProducts.js",
+    "seed:all": "node scripts/seedAdmin.js && node scripts/seedGoldPrices.js && node scripts/seedCustomers.js && node scripts/seedProducts.js",
+    "fix:kadarK": "node scripts/fixProductKadarK.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

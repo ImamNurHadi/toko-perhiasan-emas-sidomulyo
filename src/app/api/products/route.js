@@ -9,8 +9,7 @@ export async function GET(request) {
     
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const material = searchParams.get('material');
-    const featured = searchParams.get('featured');
+    const search = searchParams.get('search');
     const limit = parseInt(searchParams.get('limit')) || 20;
     const page = parseInt(searchParams.get('page')) || 1;
     
@@ -23,8 +22,11 @@ export async function GET(request) {
     };
     
     if (category) query.category = category;
-    if (material) query.material = material;
-    if (featured) query.featured = featured === 'true';
+    
+    // Search by name
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
     
     const skip = (page - 1) * limit;
     
